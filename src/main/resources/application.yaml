@@ -1,0 +1,12 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+  datasource:
+    url: jdbc:postgresql://localhost:5432/elearning
+    username: postgres
+    password: 112
+  application:
+    name: e-learning
+server:
+  port: 9090
