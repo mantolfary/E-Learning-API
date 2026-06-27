@@ -1,60 +1,49 @@
 package co.istad.fary.elearning.features.category;
 
-import co.istad.fary.elearning.features.category.dto.CategoryCreateRequest;
+import co.istad.fary.elearning.features.category.dto.CategoryRequest;
 import co.istad.fary.elearning.features.category.dto.CategoryResponse;
-import co.istad.fary.elearning.features.category.dto.CategoryUpdateRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/categories")
 @RequiredArgsConstructor
 public class CategoryController {
+
     private final CategoryService categoryService;
 
-    @PostMapping
-    public ResponseEntity<CategoryResponse> createCategory(@RequestBody CategoryCreateRequest request) {
-        CategoryResponse response = categoryService.createCategory(request);
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    @GetMapping
+    public Page<CategoryResponse> findCategories(
+            @RequestParam(required = false, defaultValue = "0") int pageNumber,
+            @RequestParam(required = false, defaultValue = "25") int pageSize
+    ) {
+        return categoryService.findCategories(pageNumber, pageSize);
     }
+
 
     @GetMapping("/{id}")
-    public ResponseEntity<CategoryResponse> getCategoryById(@PathVariable Integer id) {
-        CategoryResponse response = categoryService.getCategoryById(id);
-        return ResponseEntity.ok(response);
+    public CategoryResponse findCategoryById(@PathVariable Integer id) {
+        return categoryService.findCategoryById(id);
     }
 
-    @GetMapping
-    public ResponseEntity<Page<CategoryResponse>> getAllCategories(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<CategoryResponse> response = categoryService.getAllCategories(pageable);
-        return ResponseEntity.ok(response);
+
+    @PostMapping
+    public CategoryResponse createCategory(@Valid @RequestBody CategoryRequest categoryRequest) {
+        return categoryService.createCategory(categoryRequest);
     }
+
 
     @PutMapping("/{id}")
-    public ResponseEntity<CategoryResponse> updateCategory(
-            @PathVariable Integer id,
-            @RequestBody CategoryUpdateRequest request) {
-        CategoryResponse response = categoryService.updateCategory(id, request);
-        return ResponseEntity.ok(response);
+    public CategoryResponse updateCategory(@PathVariable Integer id, @Valid @RequestBody CategoryRequest categoryRequest) {
+        return categoryService.updateCategory(id, categoryRequest);
     }
+
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteCategory(@PathVariable Integer id) {
+    public void deleteCategory(@PathVariable Integer id) {
         categoryService.deleteCategory(id);
-        return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("/{id}/soft")
-    public ResponseEntity<Void> softDeleteCategory(@PathVariable Integer id) {
-        categoryService.softDeleteCategory(id);
-        return ResponseEntity.noContent().build();
-    }
 }

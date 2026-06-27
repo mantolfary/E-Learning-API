@@ -1,84 +1,81 @@
 package co.istad.fary.elearning.features.category;
 
-import co.istad.fary.elearning.features.category.dto.CategoryCreateRequest;
+import co.istad.fary.elearning.features.category.dto.CategoryRequest;
 import co.istad.fary.elearning.features.category.dto.CategoryResponse;
-import co.istad.fary.elearning.features.category.dto.CategoryUpdateRequest;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class CategoryServiceImpl implements CategoryService {
+
     private final CategoryRepository categoryRepository;
+    private final CategoryMapper categoryMapper;
 
     @Override
-    @Transactional
-    public CategoryResponse createCategory(CategoryCreateRequest request) {
-        Category category = new Category();
-        category.setName(request.getName());
-        category.setIcon(request.getIcon());
-        category.setIsDeleted(false);
+    public CategoryResponse createCategory(CategoryRequest categoryRequest) {
+        log.info("createCategory: {}", categoryRequest);
 
-        Category savedCategory = categoryRepository.save(category);
-        return mapToResponse(savedCategory);
-    }
-
-    @Override
-    public CategoryResponse getCategoryById(Integer id) {
-        Category category = categoryRepository.findByIdAndIsDeletedFalse(id)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
-        return mapToResponse(category);
-    }
-
-    @Override
-    public Page<CategoryResponse> getAllCategories(Pageable pageable) {
-        Page<Category> categories = categoryRepository.findByIsDeletedFalse(pageable);
-        return categories.map(this::mapToResponse);
-    }
-
-    @Override
-    @Transactional
-    public CategoryResponse updateCategory(Integer id, CategoryUpdateRequest request) {
-        Category category = categoryRepository.findByIdAndIsDeletedFalse(id)
-                .orElseThrow(() -> new RuntimeException("Category not found"));
-
-        if (request.getName() != null) {
-            category.setName(request.getName());
-        }
-        if (request.getIcon() != null) {
-            category.setIcon(request.getIcon());
+        if (categoryRepository.existsByName(categoryRequest.name())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Category is existed!");
         }
 
-        Category updatedCategory = categoryRepository.save(category);
-        return mapToResponse(updatedCategory);
+        Category category = categoryMapper.categoryRequestToCategory(categoryRequest);
+
+        category = categoryRepository.save(category);
+
+        return categoryMapper.categoryToCategoryResponse(category);
     }
 
     @Override
-    @Transactional
-    public void deleteCategory(Integer id) {
-        if (!categoryRepository.existsById(id)) {
-            throw new RuntimeException("Category not found");
-        }
-        categoryRepository.deleteById(id);
+    public Page<CategoryResponse> findCategories(int pageNumber, int pageSize) {
+        Sort sortById = Sort.by(Sort.Direction.DESC, "id");
+        PageRequest pageRequest = PageRequest.of(pageNumber, pageSize, sortById);
+        return categoryRepository
+                .findAll(pageRequest)
+                .map(categoryMapper::categoryToCategoryResponse);
     }
 
     @Override
-    @Transactional
-    public void softDeleteCategory(Integer id) {
-        if (!categoryRepository.existsById(id)) {
-            throw new RuntimeException("Category not found");
-        }
-        categoryRepository.softDeleteById(id);
+    public CategoryResponse findCategoryById(Integer categoryId) {
+        return categoryRepository
+                .findById(categoryId)
+                .map(categoryMapper::categoryToCategoryResponse)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found!"));
     }
 
-    private CategoryResponse mapToResponse(Category category) {
-        return new CategoryResponse(
-                category.getId(),
-                category.getName(),
-                category.getIcon(),
-                category.getIsDeleted());
+    @Override
+    public CategoryResponse updateCategory(Integer id, CategoryRequest categoryRequest) {
+        log.info("updateCategory: {}", categoryRequest);
+
+        if (categoryRepository.existsByName(categoryRequest.name())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Category is existed!");
+        }
+
+        Category checkedCategory = categoryRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found!"));
+
+        checkedCategory.setName(categoryRequest.name());
+        checkedCategory.setIsDeleted(categoryRequest.isDeleted());
+
+        checkedCategory = categoryRepository.save(checkedCategory);
+
+        return categoryMapper.categoryToCategoryResponse(checkedCategory);
+    }
+
+
+    @Override
+    public void deleteCategory(Integer categoryId) {
+        log.info("deleteCategory: {}", categoryId);
+        Category checkedCategory = categoryRepository.findById(categoryId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Category not found!"));
+        categoryRepository.delete(checkedCategory);
     }
 }

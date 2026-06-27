@@ -1,5 +1,6 @@
 package co.istad.fary.elearning.features.instructor;
 
+import co.istad.fary.elearning.config.auditing.BasedEntity;
 import co.istad.fary.elearning.features.course.Course;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -16,9 +17,13 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "instructor_profiles")
-public class InstructorProfile {
+public class InstructorProfile extends BasedEntity {
+    public InstructorProfile(String userId) {
+        this.userId = userId;
+    }
+
     @Id
-    private Integer userId;
+    private String userId;
     private String biography;
     private String jobTitle;
     private String phoneNumber;

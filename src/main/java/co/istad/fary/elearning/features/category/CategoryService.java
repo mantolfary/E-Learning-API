@@ -1,21 +1,39 @@
 package co.istad.fary.elearning.features.category;
 
-import co.istad.fary.elearning.features.category.dto.CategoryCreateRequest;
+
+import co.istad.fary.elearning.features.category.dto.CategoryRequest;
 import co.istad.fary.elearning.features.category.dto.CategoryResponse;
-import co.istad.fary.elearning.features.category.dto.CategoryUpdateRequest;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 
 public interface CategoryService {
-    CategoryResponse createCategory(CategoryCreateRequest request);
 
-    CategoryResponse getCategoryById(Integer id);
+    /**
+     * Create category based on category request
+     */
+    CategoryResponse createCategory(CategoryRequest categoryRequest);
 
-    Page<CategoryResponse> getAllCategories(Pageable pageable);
 
-    CategoryResponse updateCategory(Integer id, CategoryUpdateRequest request);
+    /**
+     * Find categories from database by pagination
+     */
+    Page<CategoryResponse> findCategories(int pageNumber, int pageSize);
 
-    void deleteCategory(Integer id);
 
-    void softDeleteCategory(Integer id);
+    /**
+     * Find category by ID
+     */
+    CategoryResponse findCategoryById(Integer categoryId);
+
+
+    /**
+     * Update category by ID based on category request
+     */
+    CategoryResponse updateCategory(Integer id, CategoryRequest categoryRequest);
+
+
+    /**
+     * Delete category by ID
+     */
+    void deleteCategory(Integer categoryId);
+
 }

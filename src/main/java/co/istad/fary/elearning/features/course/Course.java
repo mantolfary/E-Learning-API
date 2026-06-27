@@ -1,5 +1,6 @@
 package co.istad.fary.elearning.features.course;
 
+import co.istad.fary.elearning.config.auditing.BasedEntity;
 import co.istad.fary.elearning.features.category.Category;
 import co.istad.fary.elearning.features.enrollment.Enrollment;
 import co.istad.fary.elearning.features.instructor.InstructorProfile;
@@ -18,7 +19,7 @@ import java.util.List;
 @NoArgsConstructor
 @Entity
 @Table(name = "courses")
-public class Course {
+public class Course extends BasedEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -33,7 +34,6 @@ public class Course {
     private String level;
     private BigDecimal price;
     private Float discountPercent;
-    private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
     @ManyToOne
