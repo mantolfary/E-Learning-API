@@ -29,6 +29,7 @@ public class SecurityConfig {
                         "/api/v1/categories/**",
                         "/api/v1/courses/**"
                 ).permitAll()
+                .requestMatchers(HttpMethod.POST, "/api/v1/auth/register").permitAll()
                 .requestMatchers(HttpMethod.POST, "/api/v1/courses/**").hasAnyRole("INSTRUCTOR", "ADMIN")
                 .anyRequest().authenticated());
         http.sessionManagement(state -> state.sessionCreationPolicy(SessionCreationPolicy.STATELESS));

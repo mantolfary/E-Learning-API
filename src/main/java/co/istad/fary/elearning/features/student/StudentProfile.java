@@ -19,11 +19,11 @@ import java.util.List;
 @Table(name = "student_profiles")
 public class StudentProfile extends BasedEntity {
     @Id
-    private Integer userId;
+    private String userId;
 
+    private String profilePicture;
     private String university;
     private String major;
-    private String biography;
     private String phoneNumber;
     private String githubLink;
     private String facebookLink;

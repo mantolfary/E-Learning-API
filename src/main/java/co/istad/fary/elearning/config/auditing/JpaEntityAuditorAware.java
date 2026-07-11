@@ -1,5 +1,6 @@
 package co.istad.fary.elearning.config.auditing;
 
+import co.istad.fary.elearning.security.AuthUtils;
 import org.jspecify.annotations.NullMarked;
 import org.springframework.data.domain.AuditorAware;
 import org.springframework.security.core.Authentication;
@@ -16,19 +17,7 @@ public class JpaEntityAuditorAware implements AuditorAware<String> {
     @Override
     public Optional<String> getCurrentAuditor() {
 
-        // Get authentication object
-        Authentication auth = SecurityContextHolder
-                .getContext()
-                .getAuthentication();
-
-        if (auth != null) {
-            Jwt jwt = (Jwt) auth.getPrincipal();
-            if (jwt != null) {
-                return Optional.of(jwt.getSubject());
-            }
-        }
-
-        return Optional.of("SYSTEM");
+        return Optional.ofNullable(AuthUtils.extractUserId());
     }
 
 }
